@@ -5,14 +5,8 @@ cmds = [
   "npm run build"
 ]
 
-[phases.start]
-cmds = [
-  "npx prisma migrate deploy",
-  "npm start"
-]
-
 [start]
-cmd = "npm start"
+cmd = "sh -c 'npx prisma migrate deploy && npm start'"
 
 [variables]
 NODE_ENV = "production"

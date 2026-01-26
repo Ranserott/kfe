@@ -1,53 +1,58 @@
 # Deployment - kfe POS
 
-## Dokploy Deployment
+## Dokploy Deployment - Configuración Actual
 
-### 1. Configurar Base de Datos en Dokploy
+### Variables de Entorno Configuradas
 
-1. Ve a tu panel de Dokploy
-2. Crea una nueva base de datos PostgreSQL
-3. Copia la **Connection String** de la base de datos
-
-### 2. Configurar Variables de Entorno
-
-En tu aplicación de Dokploy, agrega las siguientes variables:
+En tu aplicación de Dokploy, configura estas variables:
 
 ```bash
-DATABASE_URL="postgresql://postgres:TU_PASSWORD@TU_HOST:5432/kfe?schema=public"
-NEXTAUTH_URL="https://tu-subdominio.dokploy.com"
+DATABASE_URL="postgresql://root:Rioma150897@database-kfe-v8baxu:5432/kfe"
+NEXTAUTH_URL="https://kfe.bytea.cl"
 NEXTAUTH_SECRET="genera-con-openssl-rand-base64-32"
 NODE_ENV="production"
 PORT="3000"
 ```
 
-### 3. Generar NEXTAUTH_SECRET
+### Pasos para Deploy
 
-En tu terminal local:
+1. **Generar NEXTAUTH_SECRET**:
 ```bash
 openssl rand -base64 32
 ```
 
-Copia el resultado y úsalo como valor de `NEXTAUTH_SECRET`.
+2. **Configurar variables en Dokploy**:
+   - Ve a tu aplicación en Dokploy
+   - Busca la sección "Environment Variables"
+   - Agrega las variables de arriba (reemplaza NEXTAUTH_SECRET con el generado)
 
-### 4. Hacer Deploy
+3. **Hacer deploy**:
+   - Push a GitHub
+   - Dokploy hará deploy automático o click en "Deploy"
 
-1. Push tus cambios a GitHub
-2. En Dokploy, selecciona tu repositorio
-3. Click en "Deploy"
+### Arreglo del Error de Build
 
-### Solución de Problemas
+El error `Can't reach database server at localhost:5432` ocurria porque las migraciones se ejecutaban durante el build sin acceso a las variables de entorno.
 
-#### Error: Can't reach database server at `localhost:5432`
+**Solución aplicada**: Modificado `nixpacks.toml` para ejecutar migraciones durante el start phase, cuando las variables ya están disponibles.
 
-**Problema**: La variable `DATABASE_URL` está apuntando a `localhost`.
+## Solución de Problemas
 
-**Solución**: Configura la variable `DATABASE_URL` en Dokploy con la URL de tu base de datos remota, NO localhost.
+### Error: Can't reach database server at `localhost:5432`
 
-#### Error: Build failed
+**Solución**: Asegúrate de que `DATABASE_URL` en Dokploy apunte a tu base de datos remota:
+```
+postgresql://root:Rioma150897@database-kfe-v8baxu:5432/kfe
+```
+NO a localhost.
 
-**Problema**: Las variables de entorno no están configuradas correctamente.
+### Error: Build failed
 
-**Solución**: Asegúrate de agregar todas las variables en el panel de Dokploy ANTES de hacer deploy.
+**Verifica**:
+1. Todas las variables de entorno están configuradas en Dokploy
+2. DATABASE_URL es correcta (usa la URL interna de Dokploy)
+3. NEXTAUTH_URL apunta a tu dominio (https://kfe.bytea.cl)
+4. NEXTAUTH_SECRET es único y seguro
 
 ## Local Development
 
@@ -55,8 +60,10 @@ Copia el resultado y úsalo como valor de `NEXTAUTH_SECRET`.
 # Instalar dependencias
 npm install
 
-# Configurar base de datos local
-# Edita .env con: DATABASE_URL="postgresql://postgres:postgres@localhost:5432/kfe?schema=public"
+# Configurar .env local
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/kfe?schema=public"
+NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_SECRET="cualquier-valor-local"
 
 # Ejecutar migraciones
 npm run db:push
@@ -77,3 +84,8 @@ npm run db:push        # Push schema a database
 npm run db:seed        # Seed de datos
 npm run db:studio      # Abrir Prisma Studio
 ```
+
+## URLs
+
+- **Producción**: https://kfe.bytea.cl
+- **Repositorio**: https://github.com/Ranserott/kfe
