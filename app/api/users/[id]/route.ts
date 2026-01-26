@@ -7,7 +7,7 @@ import bcrypt from 'bcryptjs'
 // PUT - Actualizar usuario
 export async function PUT(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -15,7 +15,7 @@ export async function PUT(
       return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 401 })
     }
 
-    const { id } = params
+    const { id } = await params
     const body = await req.json()
     const { name, email, password, role, phone, isActive } = body
 
@@ -75,7 +75,7 @@ export async function PUT(
 // DELETE - Eliminar usuario
 export async function DELETE(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -83,7 +83,7 @@ export async function DELETE(
       return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 401 })
     }
 
-    const { id } = params
+    const { id } = await params
 
     // No permitir eliminar el propio usuario
     if (id === session.user.id) {
