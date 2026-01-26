@@ -6,18 +6,20 @@ FROM base AS deps
 RUN apk add --no-cache openssl
 WORKDIR /app
 
-# Copy package files
+# Copy package files and Prisma schema
 COPY package.json package-lock.json* ./
-RUN npm ci
+COPY prisma ./prisma/
+
+# Install dependencies without running postinstall scripts
+RUN npm ci --ignore-scripts
+RUN npx prisma generate
 
 # Build the application
 FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/prisma ./prisma
 COPY . .
-
-# Generate Prisma Client
-RUN npx prisma generate
 
 # Build Next.js
 RUN npm run build
@@ -26,8 +28,8 @@ RUN npm run build
 FROM base AS runner
 WORKDIR /app
 
-ENV NODE_ENV production
-ENV PORT 3000
+ENV NODE_ENV=production
+ENV PORT=3000
 
 # Create non-root user
 RUN addgroup --system --gid 1001 nodejs
@@ -48,8 +50,7 @@ USER nextjs
 
 EXPOSE 3000
 
-ENV PORT 3000
-ENV HOSTNAME "0.0.0.0"
+ENV HOSTNAME="0.0.0.0"
 
 # Run migrations and start server
 CMD ["sh", "-c", "npx prisma migrate deploy && node server.js"]
