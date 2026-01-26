@@ -1,6 +1,6 @@
 # Deployment - kfe POS
 
-## Dokploy Deployment - Configuración Actual
+## Dokploy Deployment - Configuración con Docker
 
 ### Variables de Entorno Configuradas
 
@@ -14,47 +14,61 @@ NODE_ENV="production"
 PORT="3000"
 ```
 
-### Pasos para Deploy
+### Pasos para Deploy con Docker
 
 1. **Generar NEXTAUTH_SECRET**:
 ```bash
 openssl rand -base64 32
 ```
 
-2. **Configurar variables en Dokploy**:
-   - Ve a tu aplicación en Dokploy
-   - Busca la sección "Environment Variables"
-   - Agrega las variables de arriba (reemplaza NEXTAUTH_SECRET con el generado)
+2. **Configurar aplicación en Dokploy**:
+   - Crea una nueva aplicación
+   - Selecciona tu repositorio de GitHub
+   - Tipo de build: **Dockerfile** (no Nixpacks)
+   - Configura las variables de entorno arriba
 
 3. **Hacer deploy**:
    - Push a GitHub
-   - Dokploy hará deploy automático o click en "Deploy"
+   - Dokploy detectará el Dockerfile automáticamente
+   - Click en "Deploy"
 
-### Arreglo del Error de Build
+### Estructura del Dockerfile
 
-El error `Can't reach database server at localhost:5432` ocurria porque las migraciones se ejecutaban durante el build sin acceso a las variables de entorno.
-
-**Solución aplicada**: Modificado `nixpacks.toml` para ejecutar migraciones durante el start phase, cuando las variables ya están disponibles.
+El Dockerfile usa una configuración multi-stage optimizada:
+- **Base**: Node.js 20 Alpine (ligero y seguro)
+- **Deps**: Instala dependencias
+- **Builder**: Compila Next.js con output standalone
+- **Runner**: Imagen final de producción
+- Migraciones de Prisma se ejecutan al iniciar el container
 
 ## Solución de Problemas
 
-### Error: Can't reach database server at `localhost:5432`
+### Error: EBUSY durante build
 
-**Solución**: Asegúrate de que `DATABASE_URL` en Dokploy apunte a tu base de datos remota:
-```
-postgresql://root:Rioma150897@database-kfe-v8baxu:5432/kfe
-```
-NO a localhost.
+**Solución**: Usar Dockerfile en lugar de Nixpacks. Nixpacks tiene problemas de cache con npm.
 
-### Error: Build failed
+### Error: Can't reach database server
 
 **Verifica**:
-1. Todas las variables de entorno están configuradas en Dokploy
-2. DATABASE_URL es correcta (usa la URL interna de Dokploy)
-3. NEXTAUTH_URL apunta a tu dominio (https://kfe.bytea.cl)
-4. NEXTAUTH_SECRET es único y seguro
+1. `DATABASE_URL` apunta a tu base de datos remota de Dokploy
+2. NO uses localhost en producción
+3. La base de datos está corriendo en Dokploy
 
-## Local Development
+### Error: Cannot find module
+
+**Solución**: El Dockerfile instala todas las dependencias necesarias. Si persiste, haz un rebuild sin cache.
+
+## Local Development con Docker
+
+```bash
+# Construir imagen
+docker build -t kfe-pos .
+
+# Correr container
+docker run -p 3000:3000 --env-file .env kfe-pos
+```
+
+## Local Development (sin Docker)
 
 ```bash
 # Instalar dependencias
@@ -89,3 +103,4 @@ npm run db:studio      # Abrir Prisma Studio
 
 - **Producción**: https://kfe.bytea.cl
 - **Repositorio**: https://github.com/Ranserott/kfe
+- **Docker Hub**: (opcional, para registry privado)
