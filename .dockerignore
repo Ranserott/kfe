@@ -1,0 +1,45 @@
+# Dependencies
+node_modules
+npm-debug.log
+yarn-error.log
+
+# Next.js
+.next
+out
+
+# Environment
+.env
+.env.local
+.env*.local
+
+# Vercel
+.vercel
+
+# Git
+.git
+.gitignore
+
+# Docker
+Dockerfile
+.dockerignore
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Tests
+coverage
+.nyc_output
+
+# Misc
+*.log
+README.md
+DEPLOYMENT.md
+CHECK_SIDEBAR.md
+claude.md
