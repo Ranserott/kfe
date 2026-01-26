@@ -1,0 +1,266 @@
+// BrewFlow POS - Database Schema
+// Sistema de gestión para cafeterías
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ===============================
+// USUARIOS Y AUTENTICACIÓN
+// ===============================
+
+enum Role {
+  ADMIN
+  CASHIER
+  BARTENDER
+  DRIVER
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  password  String
+  role      Role     @default(CASHIER)
+  isActive  Boolean  @default(true)
+  phone     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  orders    Order[]
+  deliveries DeliveryOrder[] @relation("DeliveryDriver")
+}
+
+// ===============================
+// GESTIÓN DE MESAS
+// ===============================
+
+enum TableStatus {
+  FREE      // Libre - disponible
+  OCCUPIED  // Ocupada - con orden activa
+  DIRTY     // Sucia - necesita limpieza
+}
+
+model Table {
+  id        String      @id @default(cuid())
+  number    Int         @unique
+  capacity  Int         @default(4)
+  status    TableStatus @default(FREE)
+  positionX Int?
+  positionY Int?
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  orders    Order[]
+}
+
+// ===============================
+// DELIVERY
+// ===============================
+
+enum DeliveryStatus {
+  PENDING      // Pendiente de asignar
+  ASSIGNED      // Asignado a repartidor
+  PICKED_UP     // Recogido por repartidor
+  IN_TRANSIT    // En camino
+  DELIVERED     // Entregado
+  CANCELLED     // Cancelado
+}
+
+model DeliveryOrder {
+  id              String          @id @default(cuid())
+  orderId         String          @unique
+  order           Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  customerName    String
+  customerPhone   String
+  customerAddress String
+  deliveryFee     Float           @default(0)
+  status          DeliveryStatus @default(PENDING)
+  estimatedTime   Int?            // Minutos estimados
+  actualTime      Int?            // Minutos reales
+  driverId        String?
+  driver          User?           @relation("DeliveryDriver", fields: [driverId], references: [id], onDelete: SetNull)
+  pickupTime      DateTime?
+  deliveredAt     DateTime?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+}
+
+// ===============================
+// PROVEEDORES
+// ===============================
+
+model Provider {
+  id              String   @id @default(cuid())
+  name            String
+  phone           String
+  email           String?
+  address         String?
+  ruc             String?  @unique
+  contactPerson   String?
+  paymentTerms    String?  // Ej: "30 días", "Contado"
+  notes           String?
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  inventoryItems  InventoryItem[]
+}
+
+// ===============================
+// CLIENTES FRECUENTES (para delivery)
+// ===============================
+
+model Customer {
+  id              String   @id @default(cuid())
+  name            String
+  phone           String   @unique
+  email           String?
+  defaultAddress  String?
+  addressHistory   String[] // Historial de direcciones
+  orderCount      Int      @default(0)
+  lastOrderDate   DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  orders          Order[]   @relation("CustomerOrders")
+}
+
+// ===============================
+// ÓRDENES Y PEDIDOS
+// ===============================
+
+enum OrderType {
+  DINE_IN      // Comer en local
+  TAKEAWAY     // Para llevar
+  DELIVERY     // Delivery
+}
+
+enum OrderStatus {
+  PENDING    // Recibida, pendiente de preparar
+  PREPARING  // En preparación
+  READY      // Lista para servir/recoger
+  DELIVERED  // Entregada al cliente
+  CLOSED     // Cerrada (cobrada y stock descontado)
+  CANCELLED  // Cancelada
+}
+
+model Order {
+  id         String       @id @default(cuid())
+  tableId    String?
+  table      Table?       @relation(fields: [tableId], references: [id], onDelete: SetNull)
+  type       OrderType    @default(DINE_IN)
+  status     OrderStatus  @default(PENDING)
+  total      Float        @default(0)
+  notes      String?
+  createdAt  DateTime     @default(now())
+  closedAt   DateTime?
+  userId     String?
+  user       User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+  customerId String?
+  customer   Customer?    @relation("CustomerOrders", fields: [customerId], references: [id], onDelete: SetNull)
+  items      OrderItem[]
+  delivery   DeliveryOrder?
+}
+
+model OrderItem {
+  id        String   @id @default(cuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  quantity  Int      @default(1)
+  unitPrice Float
+  modifiers String[] @default([])
+  notes     String?
+  createdAt DateTime @default(now())
+}
+
+// ===============================
+// PRODUCTOS Y MENÚ
+// ===============================
+
+model Category {
+  id           String    @id @default(cuid())
+  name         String    @unique
+  displayOrder Int       @default(0)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  products     Product[]
+}
+
+model Product {
+  id           String     @id @default(cuid())
+  name         String
+  description  String?
+  price        Float
+  barcode      String?    @unique
+  imageUrl     String?
+  categoryId   String
+  category     Category   @relation(fields: [categoryId], references: [id])
+  isPreparable Boolean    @default(true)
+  isActive     Boolean    @default(true)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  items        OrderItem[]
+  recipes      Recipe[]
+  modifiers    Modifier[]
+}
+
+// ===============================
+// MODIFICADORES (extras, alternativas)
+// ===============================
+
+model Modifier {
+  id          String   @id @default(cuid())
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name        String
+  priceAdjust Float    @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ===============================
+// INVENTARIO Y RECETAS
+// ===============================
+
+enum StockUnit {
+  GRAM
+  KILOGRAM
+  MILLILITER
+  LITER
+  UNIT
+  BAG
+  BOX
+}
+
+model InventoryItem {
+  id             String        @id @default(cuid())
+  name           String        @unique
+  currentStock   Float         @default(0)
+  minStock       Float         @default(10)
+  unit           StockUnit     @default(UNIT)
+  costPerUnit    Float?
+  supplier       String?       // Deprecated - use providerId
+  providerId     String?
+  provider       Provider?     @relation(fields: [providerId], references: [id], onDelete: SetNull)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  recipes        Recipe[]
+}
+
+model Recipe {
+  id              String        @id @default(cuid())
+  productId       String
+  product         Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  inventoryItemId String
+  inventoryItem   InventoryItem @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
+  quantity        Float
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@unique([productId, inventoryItemId])
+}
