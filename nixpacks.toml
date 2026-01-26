@@ -11,3 +11,9 @@ cmd = "sh -c 'npx prisma migrate deploy && npm start'"
 [variables]
 NODE_ENV = "production"
 PORT = "3000"
+
+[build]
+cmd = "npm run build"
+
+[build.env]
+NPM_CONFIG_PRODUCTION = "false"

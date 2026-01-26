@@ -2,6 +2,10 @@
   "name": "kfe",
   "version": "1.0.0",
   "description": "BrewFlow POS - Sistema de gestión para cafeterías",
+  "engines": {
+    "node": ">=20.9.0",
+    "npm": ">=10.0.0"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && next build",
