@@ -169,34 +169,21 @@ function DashboardContent({
     <div className="min-h-screen bg-slate-50">
       {/* ===== HEADER ===== */}
       <header className="fixed top-0 left-0 right-0 z-[100] bg-white border-b-2 border-amber-500 h-16 flex items-center justify-between px-4 shadow-md">
-        <div className="flex items-center gap-4">
-          {/* BOTÓN DE TOGGLE - SIEMPRE VISIBLE */}
-          <button
-            onClick={toggleSidebar}
-            className="relative z-[100] px-4 py-2 bg-amber-500 text-white rounded-lg font-bold hover:bg-amber-600 transition-colors border-2 border-amber-700 shadow-lg flex items-center gap-2"
-            title={isMobile
-              ? (mobileMenuOpen ? "Cerrar menú" : "Abrir menú")
-              : (sidebarHidden ? "Mostrar sidebar" : "Ocultar sidebar")
-            }
-          >
-            {isMobile ? (
-              mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />
-            ) : (
-              sidebarHidden ? <Menu className="h-6 w-6" /> : <X className="h-6 w-6" />
-            )}
-            <span className="text-sm">
-              {isMobile
-                ? (mobileMenuOpen ? "Cerrar" : "Menú")
-                : (sidebarHidden ? "Mostrar" : "Ocultar")
-              }
-            </span>
-          </button>
-          <div className="flex items-center gap-2">
-            <Coffee className="h-8 w-8 text-amber-600" />
-            <div>
-              <h1 className="text-lg font-bold text-slate-900">kfe POS</h1>
-              <p className="text-xs text-slate-500">Sistema de Punto de Venta</p>
-            </div>
+        <div className="flex items-center gap-2">
+          {/* Botón de menú para mobile */}
+          {isMobile && (
+            <button
+              onClick={toggleSidebar}
+              className="p-2 hover:bg-slate-100 rounded-lg"
+              title="Abrir menú"
+            >
+              <Menu className="h-6 w-6" />
+            </button>
+          )}
+          <Coffee className="h-8 w-8 text-amber-600" />
+          <div>
+            <h1 className="text-lg font-bold text-slate-900">kfe POS</h1>
+            <p className="text-xs text-slate-500">Sistema de Punto de Venta</p>
           </div>
         </div>
         <button
@@ -216,6 +203,17 @@ function DashboardContent({
         />
       )}
 
+      {/* Botón flotante para mostrar sidebar cuando está oculta (solo desktop) */}
+      {!isMobile && sidebarHidden && (
+        <button
+          onClick={toggleSidebar}
+          className="fixed top-20 left-4 z-[95] bg-amber-500 text-white p-2 rounded-lg shadow-lg hover:bg-amber-600 transition-colors"
+          title="Mostrar sidebar"
+        >
+          <ChevronRight className="h-6 w-6" />
+        </button>
+      )}
+
       {/* Sidebar */}
       <aside
         className={cn(
@@ -230,12 +228,20 @@ function DashboardContent({
         )}
       >
         <div className="flex flex-col h-full">
-          {/* Logo Sidebar */}
-          <div className="flex items-center gap-2 h-16 px-4 border-b border-slate-800">
-            <Coffee className="h-8 w-8 text-amber-500 flex-shrink-0" />
-            <div>
+          {/* Header Sidebar con botón de colapsar */}
+          <div className="flex items-center justify-between h-16 px-4 border-b border-slate-800">
+            <div className="flex items-center gap-2">
+              <Coffee className="h-8 w-8 text-amber-500 flex-shrink-0" />
               <h1 className="text-lg font-bold whitespace-nowrap">kfe POS</h1>
             </div>
+            {/* Botón de colapsar sidebar (desktop) o cerrar (mobile) */}
+            <button
+              onClick={toggleSidebar}
+              className="p-1 hover:bg-slate-800 rounded-lg transition-colors"
+              title={isMobile ? "Cerrar menú" : "Ocultar sidebar"}
+            >
+              {isMobile ? <X className="h-6 w-6" /> : <ChevronLeft className="h-6 w-6" />}
+            </button>
           </div>
 
           {/* Navegación */}
