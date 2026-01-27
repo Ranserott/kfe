@@ -23,7 +23,7 @@ async function checkDatabase() {
     }
 
     // Check tables
-    const tableCount = await prisma.$queryRaw`SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE'`
+    const tableCount = await prisma.$queryRaw<any>`SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE'`
     console.log(`\n📊 Tablas en la BD: ${tableCount[0].count}`)
 
     // Check migrations
