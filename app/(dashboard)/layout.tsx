@@ -167,42 +167,6 @@ function DashboardContent({
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* ===== HEADER ===== */}
-      <header
-                        className={cn(
-                          'fixed top-0 right-0 z-[100] bg-white border-b-2 border-amber-500 h-16 flex items-center justify-between shadow-md transition-all duration-300',
-                          // Desktop: padding según sidebar
-                          !isMobile && !sidebarHidden && 'left-64 px-4',
-                          !isMobile && sidebarHidden && 'left-0 px-4',
-                          // Mobile: sin padding lateral
-                          isMobile && 'left-0 px-4'
-                        )}
-                      >
-        <div className="flex items-center gap-2">
-          {/* Botón de menú para mobile */}
-          {isMobile && (
-            <button
-              onClick={toggleSidebar}
-              className="p-2 hover:bg-slate-100 rounded-lg"
-              title="Abrir menú"
-            >
-              <Menu className="h-6 w-6" />
-            </button>
-          )}
-          <Coffee className="h-8 w-8 text-amber-600" />
-          <div>
-            <h1 className="text-lg font-bold text-slate-900">kfe POS</h1>
-            <p className="text-xs text-slate-500">Sistema de Punto de Venta</p>
-          </div>
-        </div>
-        <button
-          onClick={() => signOut({ callbackUrl: '/login' })}
-          className="p-2 hover:bg-slate-100 rounded-lg"
-        >
-          <LogOut className="h-5 w-5" />
-        </button>
-      </header>
-
       {/* ===== SIDEBAR ===== */}
       {/* Overlay para mobile */}
       {isMobile && mobileMenuOpen && (
@@ -216,7 +180,7 @@ function DashboardContent({
       {!isMobile && sidebarHidden && (
         <button
           onClick={toggleSidebar}
-          className="fixed top-20 left-4 z-[95] bg-amber-500 text-white p-2 rounded-lg shadow-lg hover:bg-amber-600 transition-colors"
+          className="fixed top-1/2 -translate-y-1/2 left-0 z-[95] bg-amber-500 text-white p-2 rounded-r-lg shadow-lg hover:bg-amber-600 transition-colors"
           title="Mostrar sidebar"
         >
           <ChevronRight className="h-6 w-6" />
@@ -226,7 +190,7 @@ function DashboardContent({
       {/* Sidebar */}
       <aside
         className={cn(
-          'fixed top-0 left-0 z-[80] h-full bg-slate-900 text-white transition-all duration-300 w-64',
+          'fixed top-0 left-0 z-[80] h-full bg-slate-900 text-white transition-all duration-300 w-64 flex flex-col',
           // Desktop: visible u oculta
           !isMobile && !sidebarHidden && 'translate-x-0',
           !isMobile && sidebarHidden && '-translate-x-full',
@@ -236,55 +200,72 @@ function DashboardContent({
           isMobile && mobileMenuOpen && 'translate-x-0'
         )}
       >
-        <div className="flex flex-col h-full">
-          {/* Header Sidebar con botón de colapsar */}
-          <div className="flex items-center justify-between h-16 px-4 border-b border-slate-800">
-            <div className="flex items-center gap-2">
-              <Coffee className="h-8 w-8 text-amber-500 flex-shrink-0" />
-              <h1 className="text-lg font-bold whitespace-nowrap">kfe POS</h1>
-            </div>
-            {/* Botón de colapsar sidebar (desktop) o cerrar (mobile) */}
-            <button
-              onClick={toggleSidebar}
-              className="p-1 hover:bg-slate-800 rounded-lg transition-colors"
-              title={isMobile ? "Cerrar menú" : "Ocultar sidebar"}
-            >
-              {isMobile ? <X className="h-6 w-6" /> : <ChevronLeft className="h-6 w-6" />}
-            </button>
-          </div>
+        {/* Logo */}
+        <div className="flex items-center gap-2 h-16 px-4 border-b border-slate-800 shrink-0">
+          <Coffee className="h-8 w-8 text-amber-500 flex-shrink-0" />
+          <h1 className="text-lg font-bold whitespace-nowrap">kfe POS</h1>
+        </div>
 
-          {/* Navegación */}
-          <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-            {filteredNavigation.map((item) => {
-              const isActive = pathname === item.href
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className={cn(
-                    'flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium transition-colors',
-                    isActive
-                      ? 'bg-amber-600 text-white'
-                      : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-                  )}
-                >
-                  <item.icon className="h-5 w-5 flex-shrink-0" />
-                  <span className="flex-1">{item.name}</span>
-                </Link>
-              )
-            })}
-          </nav>
+        {/* Navegación */}
+        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+          {filteredNavigation.map((item) => {
+            const isActive = pathname === item.href
+            return (
+              <Link
+                key={item.name}
+                href={item.href}
+                className={cn(
+                  'flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium transition-colors',
+                  isActive
+                    ? 'bg-amber-600 text-white'
+                    : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                )}
+              >
+                <item.icon className="h-5 w-5 flex-shrink-0" />
+                <span className="flex-1">{item.name}</span>
+              </Link>
+            )
+          })}
+        </nav>
 
-          {/* Usuario */}
-          <div className="p-4 border-t border-slate-800">
-            <div>
-              <p className="text-sm font-medium truncate">{session.user.name}</p>
-              <p className="text-xs text-slate-400 truncate">{session.user.email}</p>
-              <p className="text-xs text-amber-500 mt-1">{session.user.role}</p>
-            </div>
+        {/* Flecha para ocultar (solo desktop) - en el medio del borde derecho */}
+        {!isMobile && (
+          <button
+            onClick={toggleSidebar}
+            className="absolute top-1/2 -translate-y-1/2 -right-3 bg-amber-500 text-white p-1 rounded-r-lg shadow-lg hover:bg-amber-600 transition-colors z-[100]"
+            title="Ocultar sidebar"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+        )}
+
+        {/* Usuario y Logout */}
+        <div className="shrink-0 border-t border-slate-800">
+          <div className="p-4">
+            <p className="text-sm font-medium truncate">{session.user.name}</p>
+            <p className="text-xs text-slate-400 truncate">{session.user.email}</p>
+            <p className="text-xs text-amber-500 mt-1">{session.user.role}</p>
           </div>
+          <button
+            onClick={() => signOut({ callbackUrl: '/login' })}
+            className="w-full flex items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
+          >
+            <LogOut className="h-5 w-5" />
+            <span>Cerrar Sesión</span>
+          </button>
         </div>
       </aside>
+
+      {/* Botón de menú para mobile (flotante) */}
+      {isMobile && (
+        <button
+          onClick={toggleSidebar}
+          className="fixed top-4 left-4 z-[100] bg-amber-500 text-white p-2 rounded-lg shadow-lg hover:bg-amber-600 transition-colors"
+          title="Abrir menú"
+        >
+          <Menu className="h-6 w-6" />
+        </button>
+      )}
 
       {/* ===== CONTENIDO PRINCIPAL ===== */}
       <main
@@ -294,9 +275,9 @@ function DashboardContent({
           !isMobile && !sidebarHidden && 'pl-64',
           !isMobile && sidebarHidden && 'pl-0',
           // Mobile: padding lateral para contenido
-          isMobile && 'px-4',
-          // Header padding
-          'pt-20 pb-4'
+          isMobile && 'px-4 pt-16',
+          // Padding general
+          'p-4'
         )}
       >
         {children}
