@@ -168,7 +168,16 @@ function DashboardContent({
   return (
     <div className="min-h-screen bg-slate-50">
       {/* ===== HEADER ===== */}
-      <header className="fixed top-0 left-0 right-0 z-[100] bg-white border-b-2 border-amber-500 h-16 flex items-center justify-between px-4 shadow-md">
+      <header
+                        className={cn(
+                          'fixed top-0 right-0 z-[100] bg-white border-b-2 border-amber-500 h-16 flex items-center justify-between shadow-md transition-all duration-300',
+                          // Desktop: padding según sidebar
+                          !isMobile && !sidebarHidden && 'left-64 px-4',
+                          !isMobile && sidebarHidden && 'left-0 px-4',
+                          // Mobile: sin padding lateral
+                          isMobile && 'left-0 px-4'
+                        )}
+                      >
         <div className="flex items-center gap-2">
           {/* Botón de menú para mobile */}
           {isMobile && (
