@@ -228,17 +228,6 @@ function DashboardContent({
           })}
         </nav>
 
-        {/* Flecha para ocultar (solo desktop) - en el medio del borde derecho */}
-        {!isMobile && (
-          <button
-            onClick={toggleSidebar}
-            className="absolute top-1/2 -translate-y-1/2 -right-3 bg-amber-500 text-white p-1 rounded-r-lg shadow-lg hover:bg-amber-600 transition-colors z-[100]"
-            title="Ocultar sidebar"
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </button>
-        )}
-
         {/* Usuario y Logout */}
         <div className="shrink-0 border-t border-slate-800">
           <div className="p-4">
@@ -255,6 +244,17 @@ function DashboardContent({
           </button>
         </div>
       </aside>
+
+      {/* Flecha para ocultar sidebar (solo desktop) - FUERA de la sidebar */}
+      {!isMobile && !sidebarHidden && (
+        <button
+          onClick={toggleSidebar}
+          className="fixed top-1/2 -translate-y-1/2 left-60 z-[100] bg-amber-500 text-white p-1 rounded-r-lg shadow-lg hover:bg-amber-600 transition-all duration-300"
+          title="Ocultar sidebar"
+        >
+          <ChevronLeft className="h-5 w-5" />
+        </button>
+      )}
 
       {/* Botón de menú para mobile (flotante) */}
       {isMobile && (
@@ -275,9 +275,9 @@ function DashboardContent({
           !isMobile && !sidebarHidden && 'pl-64',
           !isMobile && sidebarHidden && 'pl-0',
           // Mobile: padding lateral para contenido
-          isMobile && 'px-4 pt-16',
-          // Padding general
-          'p-4'
+          isMobile && 'px-4 pt-16 pb-4',
+          // Padding general desktop
+          !isMobile && 'p-4'
         )}
       >
         {children}
