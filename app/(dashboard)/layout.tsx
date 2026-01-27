@@ -168,7 +168,7 @@ function DashboardContent({
   return (
     <div className="min-h-screen bg-slate-50">
       {/* ===== HEADER ===== */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b-2 border-amber-500 h-16 flex items-center justify-between px-4">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b-2 border-amber-500 h-16 flex items-center justify-between px-4 shadow-md">
         <div className="flex items-center gap-4">
           {/* BOTÓN DE TOGGLE - SIEMPRE VISIBLE */}
           <button
