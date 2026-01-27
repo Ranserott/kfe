@@ -168,12 +168,12 @@ function DashboardContent({
   return (
     <div className="min-h-screen bg-slate-50">
       {/* ===== HEADER ===== */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b-2 border-amber-500 h-16 flex items-center justify-between px-4 shadow-md">
+      <header className="fixed top-0 left-0 right-0 z-[100] bg-white border-b-2 border-amber-500 h-16 flex items-center justify-between px-4 shadow-md">
         <div className="flex items-center gap-4">
           {/* BOTÓN DE TOGGLE - SIEMPRE VISIBLE */}
           <button
             onClick={toggleSidebar}
-            className="px-4 py-2 bg-amber-500 text-white rounded-lg font-bold hover:bg-amber-600 transition-colors border-2 border-amber-700 shadow-lg flex items-center gap-2"
+            className="relative z-[100] px-4 py-2 bg-amber-500 text-white rounded-lg font-bold hover:bg-amber-600 transition-colors border-2 border-amber-700 shadow-lg flex items-center gap-2"
             title={isMobile
               ? (mobileMenuOpen ? "Cerrar menú" : "Abrir menú")
               : (sidebarHidden ? "Mostrar sidebar" : "Ocultar sidebar")
@@ -211,7 +211,7 @@ function DashboardContent({
       {/* Overlay para mobile */}
       {isMobile && mobileMenuOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-[60]"
+          className="fixed inset-0 bg-black/50 z-[90]"
           onClick={() => setMobileMenuOpen(false)}
         />
       )}
@@ -219,7 +219,7 @@ function DashboardContent({
       {/* Sidebar */}
       <aside
         className={cn(
-          'fixed top-0 left-0 z-[70] h-full bg-slate-900 text-white transition-all duration-300 w-64',
+          'fixed top-0 left-0 z-[80] h-full bg-slate-900 text-white transition-all duration-300 w-64',
           // Desktop: visible u oculta
           !isMobile && !sidebarHidden && 'translate-x-0',
           !isMobile && sidebarHidden && '-translate-x-full',
