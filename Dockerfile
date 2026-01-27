@@ -13,7 +13,7 @@ COPY prisma ./prisma/
 # Install dependencies without running postinstall scripts
 RUN npm ci --ignore-scripts
 
-# Install Prisma CLI globally with specific version to avoid v7
+# Install Prisma CLI globally with specific version
 RUN npm install -g prisma@6.19.2
 
 RUN npx prisma generate
@@ -43,8 +43,10 @@ RUN adduser --system --uid 1001 nextjs
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
+
+# Copy all Prisma-related files and modules
+COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/node_modules/.prisma/client ./node_modules/.prisma/client
 COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/package.json ./package.json
