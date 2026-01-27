@@ -13,9 +13,6 @@ COPY prisma ./prisma/
 # Install dependencies without running postinstall scripts
 RUN npm ci --ignore-scripts
 
-# Install Prisma CLI globally with specific version
-RUN npm install -g prisma@6.19.2
-
 RUN npx prisma generate
 
 # Build the application
@@ -60,5 +57,5 @@ EXPOSE 3000
 
 ENV HOSTNAME="0.0.0.0"
 
-# Use global Prisma CLI (installed in deps stage and available via PATH)
-CMD ["sh", "-c", "prisma migrate deploy && node server.js"]
+# Use local Prisma CLI from .bin
+CMD ["sh", "-c", "./node_modules/.bin/prisma migrate deploy && node server.js"]
