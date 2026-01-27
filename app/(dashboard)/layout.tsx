@@ -167,121 +167,171 @@ function DashboardContent({
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* ===== SIDEBAR ===== */}
-      {/* Overlay para mobile */}
-      {isMobile && mobileMenuOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-[90]"
-          onClick={() => setMobileMenuOpen(false)}
-        />
-      )}
+      {/* ===== DESKTOP LAYOUT ===== */}
+      {!isMobile && (
+        <div className="flex">
+          {/* Botón para mostrar sidebar cuando está oculta */}
+          {sidebarHidden && (
+            <button
+              onClick={toggleSidebar}
+              className="fixed top-1/2 -translate-y-1/2 left-0 z-50 bg-amber-500 text-white p-2 rounded-r-lg shadow-lg hover:bg-amber-600 transition-colors"
+              title="Mostrar sidebar"
+            >
+              <ChevronRight className="h-6 w-6" />
+            </button>
+          )}
 
-      {/* Botón flotante para mostrar sidebar cuando está oculta (solo desktop) */}
-      {!isMobile && sidebarHidden && (
-        <button
-          onClick={toggleSidebar}
-          className="fixed top-1/2 -translate-y-1/2 left-0 z-[95] bg-amber-500 text-white p-2 rounded-r-lg shadow-lg hover:bg-amber-600 transition-colors"
-          title="Mostrar sidebar"
-        >
-          <ChevronRight className="h-6 w-6" />
-        </button>
-      )}
+          {/* Sidebar Desktop - elemento sólido */}
+          {!sidebarHidden && (
+            <aside className="w-64 h-screen sticky top-0 bg-slate-900 text-white flex flex-col shrink-0">
+              {/* Logo */}
+              <div className="flex items-center gap-2 h-16 px-4 border-b border-slate-800 shrink-0">
+                <Coffee className="h-8 w-8 text-amber-500 flex-shrink-0" />
+                <h1 className="text-lg font-bold whitespace-nowrap">kfe POS</h1>
+              </div>
 
-      {/* Sidebar */}
-      <aside
-        className={cn(
-          'fixed top-0 left-0 z-[80] h-full bg-slate-900 text-white transition-all duration-300 w-64 flex flex-col',
-          // Desktop: visible u oculta
-          !isMobile && !sidebarHidden && 'translate-x-0',
-          !isMobile && sidebarHidden && '-translate-x-[16rem]',
-          // Mobile: oculta por defecto
-          isMobile && !mobileMenuOpen && '-translate-x-[16rem]',
-          // Mobile: visible cuando se abre
-          isMobile && mobileMenuOpen && 'translate-x-0'
-        )}
-      >
-        {/* Logo */}
-        <div className="flex items-center gap-2 h-16 px-4 border-b border-slate-800 shrink-0">
-          <Coffee className="h-8 w-8 text-amber-500 flex-shrink-0" />
-          <h1 className="text-lg font-bold whitespace-nowrap">kfe POS</h1>
-        </div>
+              {/* Navegación */}
+              <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+                {filteredNavigation.map((item) => {
+                  const isActive = pathname === item.href
+                  return (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      className={cn(
+                        'flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium transition-colors',
+                        isActive
+                          ? 'bg-amber-600 text-white'
+                          : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                      )}
+                    >
+                      <item.icon className="h-5 w-5 flex-shrink-0" />
+                      <span className="flex-1">{item.name}</span>
+                    </Link>
+                  )
+                })}
+              </nav>
 
-        {/* Navegación */}
-        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-          {filteredNavigation.map((item) => {
-            const isActive = pathname === item.href
-            return (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={cn(
-                  'flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium transition-colors',
-                  isActive
-                    ? 'bg-amber-600 text-white'
-                    : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-                )}
+              {/* Usuario y Logout */}
+              <div className="shrink-0 border-t border-slate-800">
+                <div className="p-4">
+                  <p className="text-sm font-medium truncate">{session.user.name}</p>
+                  <p className="text-xs text-slate-400 truncate">{session.user.email}</p>
+                  <p className="text-xs text-amber-500 mt-1">{session.user.role}</p>
+                </div>
+                <button
+                  onClick={() => signOut({ callbackUrl: '/login' })}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
+                >
+                  <LogOut className="h-5 w-5" />
+                  <span>Cerrar Sesión</span>
+                </button>
+              </div>
+
+              {/* Flecha para ocultar sidebar */}
+              <button
+                onClick={toggleSidebar}
+                className="absolute top-1/2 -translate-y-1/2 -right-3 bg-amber-500 text-white p-1 rounded-r-lg shadow-lg hover:bg-amber-600 transition-colors"
+                title="Ocultar sidebar"
               >
-                <item.icon className="h-5 w-5 flex-shrink-0" />
-                <span className="flex-1">{item.name}</span>
-              </Link>
-            )
-          })}
-        </nav>
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+            </aside>
+          )}
 
-        {/* Usuario y Logout */}
-        <div className="shrink-0 border-t border-slate-800">
-          <div className="p-4">
-            <p className="text-sm font-medium truncate">{session.user.name}</p>
-            <p className="text-xs text-slate-400 truncate">{session.user.email}</p>
-            <p className="text-xs text-amber-500 mt-1">{session.user.role}</p>
-          </div>
-          <button
-            onClick={() => signOut({ callbackUrl: '/login' })}
-            className="w-full flex items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
-          >
-            <LogOut className="h-5 w-5" />
-            <span>Cerrar Sesión</span>
-          </button>
+          {/* Contenido principal Desktop */}
+          <main className="flex-1 p-4 min-h-screen">
+            {children}
+          </main>
         </div>
-      </aside>
-
-      {/* Flecha para ocultar sidebar (solo desktop) - FUERA de la sidebar */}
-      {!isMobile && !sidebarHidden && (
-        <button
-          onClick={toggleSidebar}
-          className="fixed top-1/2 -translate-y-1/2 left-60 z-[100] bg-amber-500 text-white p-1 rounded-r-lg shadow-lg hover:bg-amber-600 transition-all duration-300"
-          title="Ocultar sidebar"
-        >
-          <ChevronLeft className="h-5 w-5" />
-        </button>
       )}
 
-      {/* Botón de menú para mobile (flotante) */}
+      {/* ===== MOBILE LAYOUT ===== */}
       {isMobile && (
-        <button
-          onClick={toggleSidebar}
-          className="fixed top-4 left-4 z-[100] bg-amber-500 text-white p-2 rounded-lg shadow-lg hover:bg-amber-600 transition-colors"
-          title="Abrir menú"
-        >
-          <Menu className="h-6 w-6" />
-        </button>
-      )}
+        <>
+          {/* Overlay */}
+          {mobileMenuOpen && (
+            <div
+              className="fixed inset-0 bg-black/50 z-40"
+              onClick={() => setMobileMenuOpen(false)}
+            />
+          )}
 
-      {/* ===== CONTENIDO PRINCIPAL ===== */}
-      <main
-        className={cn(
-          'transition-all duration-300 min-h-screen',
-          // Desktop: padding según estado
-          !isMobile && !sidebarHidden && 'pl-64',
-          !isMobile && sidebarHidden && 'pl-0',
-          // Mobile: padding lateral para contenido
-          isMobile && 'px-4 pt-16 pb-4',
-          // Padding general desktop
-          !isMobile && 'p-4'
-        )}
-      >
-        {children}
-      </main>
+          {/* Botón de menú flotante */}
+          <button
+            onClick={toggleSidebar}
+            className="fixed top-4 left-4 z-50 bg-amber-500 text-white p-2 rounded-lg shadow-lg hover:bg-amber-600 transition-colors"
+            title="Abrir menú"
+          >
+            <Menu className="h-6 w-6" />
+          </button>
+
+          {/* Sidebar Mobile - fixed */}
+          <aside
+            className={cn(
+              'fixed top-0 left-0 z-50 h-full bg-slate-900 text-white transition-transform duration-300 w-64 flex flex-col',
+              mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+            )}
+          >
+            {/* Logo */}
+            <div className="flex items-center justify-between h-16 px-4 border-b border-slate-800 shrink-0">
+              <div className="flex items-center gap-2">
+                <Coffee className="h-8 w-8 text-amber-500 flex-shrink-0" />
+                <h1 className="text-lg font-bold whitespace-nowrap">kfe POS</h1>
+              </div>
+              <button
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-1 hover:bg-slate-800 rounded-lg"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+
+            {/* Navegación */}
+            <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+              {filteredNavigation.map((item) => {
+                const isActive = pathname === item.href
+                return (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className={cn(
+                      'flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium transition-colors',
+                      isActive
+                        ? 'bg-amber-600 text-white'
+                        : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                    )}
+                  >
+                    <item.icon className="h-5 w-5 flex-shrink-0" />
+                    <span className="flex-1">{item.name}</span>
+                  </Link>
+                )
+              })}
+            </nav>
+
+            {/* Usuario y Logout */}
+            <div className="shrink-0 border-t border-slate-800">
+              <div className="p-4">
+                <p className="text-sm font-medium truncate">{session.user.name}</p>
+                <p className="text-xs text-slate-400 truncate">{session.user.email}</p>
+                <p className="text-xs text-amber-500 mt-1">{session.user.role}</p>
+              </div>
+              <button
+                onClick={() => signOut({ callbackUrl: '/login' })}
+                className="w-full flex items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
+              >
+                <LogOut className="h-5 w-5" />
+                <span>Cerrar Sesión</span>
+              </button>
+            </div>
+          </aside>
+
+          {/* Contenido principal Mobile */}
+          <main className="p-4 pt-16">
+            {children}
+          </main>
+        </>
+      )}
     </div>
   )
 }
