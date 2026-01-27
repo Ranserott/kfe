@@ -61,7 +61,7 @@ function LoginContent() {
               <Input
                 id="email"
                 type="email"
-                placeholder="admin@kfe.com"
+                placeholder="admin@kfe.cl"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -89,9 +89,8 @@ function LoginContent() {
             </Button>
           </form>
           <div className="mt-6 text-sm text-slate-500 text-center">
-            <p className="font-medium mb-2">Credenciales de prueba:</p>
-            <p>Admin: admin@kfe.com / admin123</p>
-            <p>Cashier: cashier@kfe.com / cashier123</p>
+            <p className="font-medium mb-2">Credenciales de demo:</p>
+            <p>Admin: admin@kfe.cl / Admin123!</p>
           </div>
         </CardContent>
       </Card>
