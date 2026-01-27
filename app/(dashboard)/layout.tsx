@@ -193,9 +193,9 @@ function DashboardContent({
           'fixed top-0 left-0 z-[80] h-full bg-slate-900 text-white transition-all duration-300 w-64 flex flex-col',
           // Desktop: visible u oculta
           !isMobile && !sidebarHidden && 'translate-x-0',
-          !isMobile && sidebarHidden && '-translate-x-full',
+          !isMobile && sidebarHidden && '-translate-x-[16rem]',
           // Mobile: oculta por defecto
-          isMobile && !mobileMenuOpen && '-translate-x-full',
+          isMobile && !mobileMenuOpen && '-translate-x-[16rem]',
           // Mobile: visible cuando se abre
           isMobile && mobileMenuOpen && 'translate-x-0'
         )}
