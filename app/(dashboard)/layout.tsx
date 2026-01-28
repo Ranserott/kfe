@@ -77,17 +77,20 @@ function DashboardContent({
       const width = window.innerWidth
       const mobile = width < 1024
       console.log('🖥️ Screen size:', width, 'isMobile:', mobile)
-      setIsMobile(mobile)
-      // En desktop, mostrar sidebar por defecto
-      if (!mobile && sidebarHidden) {
-        setSidebarHidden(false)
-      }
+      
+      setIsMobile(prevMobile => {
+        // Si pasamos de mobile a desktop, mostramos la sidebar por defecto
+        if (prevMobile && !mobile) {
+          setSidebarHidden(false)
+        }
+        return mobile
+      })
     }
 
     checkSize()
     window.addEventListener('resize', checkSize)
     return () => window.removeEventListener('resize', checkSize)
-  }, [sidebarHidden])
+  }, []) // Eliminamos sidebarHidden de las dependencias
 
   // Redireccionar si no autenticado
   useEffect(() => {
