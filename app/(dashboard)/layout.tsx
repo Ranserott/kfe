@@ -170,20 +170,14 @@ function DashboardContent({
       {/* ===== DESKTOP LAYOUT ===== */}
       {!isMobile && (
         <div className="flex">
-          {/* Botón para mostrar sidebar cuando está oculta */}
-          {sidebarHidden && (
-            <button
-              onClick={toggleSidebar}
-              className="fixed top-1/2 -translate-y-1/2 left-0 z-50 bg-amber-500 text-white p-2 rounded-r-lg shadow-lg hover:bg-amber-600 transition-colors"
-              title="Mostrar sidebar"
-            >
-              <ChevronRight className="h-6 w-6" />
-            </button>
-          )}
-
-          {/* Sidebar Desktop - elemento sólido */}
-          {!sidebarHidden && (
-            <aside className="w-64 h-screen sticky top-0 bg-slate-900 text-white flex flex-col shrink-0">
+          {/* Sidebar Desktop - siempre renderizada, visibility controlada por CSS */}
+          <aside
+            className={cn(
+              'h-screen sticky top-0 bg-slate-900 text-white flex flex-col shrink-0 transition-all duration-300 overflow-hidden',
+              sidebarHidden ? 'w-0' : 'w-64'
+            )}
+          >
+            <div className="w-64 flex flex-col h-full">
               {/* Logo */}
               <div className="flex items-center gap-2 h-16 px-4 border-b border-slate-800 shrink-0">
                 <Coffee className="h-8 w-8 text-amber-500 flex-shrink-0" />
@@ -229,14 +223,27 @@ function DashboardContent({
               </div>
 
               {/* Flecha para ocultar sidebar */}
-              <button
-                onClick={toggleSidebar}
-                className="absolute top-1/2 -translate-y-1/2 -right-3 bg-amber-500 text-white p-1 rounded-r-lg shadow-lg hover:bg-amber-600 transition-colors"
-                title="Ocultar sidebar"
-              >
-                <ChevronLeft className="h-5 w-5" />
-              </button>
-            </aside>
+              {!sidebarHidden && (
+                <button
+                  onClick={toggleSidebar}
+                  className="absolute top-1/2 -translate-y-1/2 -right-3 bg-amber-500 text-white p-1 rounded-r-lg shadow-lg hover:bg-amber-600 transition-colors"
+                  title="Ocultar sidebar"
+                >
+                  <ChevronLeft className="h-5 w-5" />
+                </button>
+              )}
+            </div>
+          </aside>
+
+          {/* Botón para mostrar sidebar cuando está oculta */}
+          {sidebarHidden && (
+            <button
+              onClick={toggleSidebar}
+              className="fixed top-1/2 -translate-y-1/2 left-0 z-50 bg-amber-500 text-white p-2 rounded-r-lg shadow-lg hover:bg-amber-600 transition-colors"
+              title="Mostrar sidebar"
+            >
+              <ChevronRight className="h-6 w-6" />
+            </button>
           )}
 
           {/* Contenido principal Desktop */}
