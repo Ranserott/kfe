@@ -39,6 +39,9 @@ export default function TablesPage() {
   const [loading, setLoading] = useState(true)
   const [selectedTable, setSelectedTable] = useState<Table | null>(null)
   const [actionMenuTable, setActionMenuTable] = useState<string | null>(null)
+  const [showAddModal, setShowAddModal] = useState(false)
+  const [newTableNumber, setNewTableNumber] = useState('')
+  const [newTableCapacity, setNewTableCapacity] = useState('2')
 
   const fetchTables = async () => {
     try {
@@ -188,6 +191,49 @@ export default function TablesPage() {
     router.push(`/pos?table=${tableId}`)
   }
 
+  const handleAddTable = async () => {
+    const number = parseInt(newTableNumber)
+    const capacity = parseInt(newTableCapacity)
+
+    if (!number || number < 1) {
+      alert('Por favor ingresa un número de mesa válido')
+      return
+    }
+
+    if (!capacity || capacity < 1 || capacity > 20) {
+      alert('La capacidad debe ser entre 1 y 20 personas')
+      return
+    }
+
+    // Verificar si ya existe una mesa con ese número
+    const existingTable = tables.find(t => t.number === number)
+    if (existingTable) {
+      alert(`Ya existe una mesa con el número ${number}`)
+      return
+    }
+
+    try {
+      const res = await fetch('/api/tables', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ number, capacity }),
+      })
+
+      if (res.ok) {
+        fetchTables()
+        setShowAddModal(false)
+        setNewTableNumber('')
+        setNewTableCapacity('2')
+      } else {
+        const data = await res.json()
+        alert(data.error || 'Error al crear mesa')
+      }
+    } catch (error) {
+      console.error('Error creating table:', error)
+      alert('Error al crear mesa')
+    }
+  }
+
   const getStatusColor = (status: TableStatus) => {
     switch (status) {
       case 'FREE':
@@ -235,9 +281,15 @@ export default function TablesPage() {
           <h1 className="text-3xl font-bold text-slate-900">Mapa de Mesas</h1>
           <p className="text-slate-500 mt-1">Gestiona el estado de las mesas del local</p>
         </div>
-        <Button onClick={fetchTables} variant="outline" size="sm">
-          Actualizar
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={() => setShowAddModal(true)} size="sm" className="bg-amber-500 hover:bg-amber-600">
+            <Plus className="h-4 w-4 mr-2" />
+            Agregar Mesa
+          </Button>
+          <Button onClick={fetchTables} variant="outline" size="sm">
+            Actualizar
+          </Button>
+        </div>
       </div>
 
       {/* Stats */}
@@ -534,6 +586,76 @@ export default function TablesPage() {
                   })}
                 </div>
               )}
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Add Table Modal */}
+      {showAddModal && (
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+          onClick={() => setShowAddModal(false)}
+        >
+          <Card
+            className="w-full max-w-md"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>Agregar Nueva Mesa</CardTitle>
+                <Button variant="ghost" size="sm" onClick={() => setShowAddModal(false)}>
+                  ✕
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Número de Mesa</label>
+                  <input
+                    type="number"
+                    value={newTableNumber}
+                    onChange={(e) => setNewTableNumber(e.target.value)}
+                    placeholder="Ej: 9"
+                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    min="1"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Capacidad (personas)</label>
+                  <select
+                    value={newTableCapacity}
+                    onChange={(e) => setNewTableCapacity(e.target.value)}
+                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  >
+                    <option value="1">1 persona</option>
+                    <option value="2">2 personas</option>
+                    <option value="3">3 personas</option>
+                    <option value="4">4 personas</option>
+                    <option value="5">5 personas</option>
+                    <option value="6">6 personas</option>
+                    <option value="8">8 personas</option>
+                    <option value="10">10 personas</option>
+                    <option value="12">12 personas</option>
+                  </select>
+                </div>
+                <div className="flex gap-2 pt-4">
+                  <Button
+                    onClick={() => setShowAddModal(false)}
+                    variant="outline"
+                    className="flex-1"
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    onClick={handleAddTable}
+                    className="flex-1 bg-amber-500 hover:bg-amber-600"
+                  >
+                    Agregar Mesa
+                  </Button>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>

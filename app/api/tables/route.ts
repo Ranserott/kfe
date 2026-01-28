@@ -26,19 +26,29 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session || session.user.role !== 'ADMIN') {
+    if (!session) {
       return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 401 })
     }
 
     const body = await req.json()
     const { number, capacity, positionX, positionY } = body
 
+    // Verificar si ya existe una mesa con ese número
+    const existingTable = await prisma.table.findUnique({
+      where: { number }
+    })
+
+    if (existingTable) {
+      return NextResponse.json({ success: false, error: `Ya existe una mesa con el número ${number}` }, { status: 400 })
+    }
+
     const table = await prisma.table.create({
       data: {
         number,
-        capacity: capacity || 4,
-        positionX,
-        positionY,
+        capacity: capacity || 2,
+        status: TableStatus.FREE,
+        positionX: positionX || null,
+        positionY: positionY || null,
       },
     })
 
